@@ -28,6 +28,9 @@ const { actions, reducer } = createSlice({
          state.loading = false;
          state.error = payload;
       },
+      clearValidationError(state) {
+         state.errors = null;
+      },
       clearUser(state) {
          state.loading = false;
          state.user = null;
@@ -54,6 +57,6 @@ const { actions, reducer } = createSlice({
    },
 });
 
-export const { setUser, clearUser, userError } = actions;
+export const { setUser, clearUser, userError, userValidationError, clearValidationError } = actions;
 
 export default reducer;

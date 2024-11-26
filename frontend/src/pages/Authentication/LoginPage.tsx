@@ -1,14 +1,19 @@
-import React,  {ChangeEvent, FunctionComponent, useCallback, useState } from 'react';
+import React, {ChangeEvent, FunctionComponent, useCallback, useEffect, useState} from 'react';
 import { postUserLogin } from '../../redux/calls/Users/processLogin';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
+import InputError from '../../components/InputError';
+import { clearValidationError } from '../../redux/reducers/authReducer';
 
 const LoginPage: FunctionComponent = () => {
    const dispatch: AppDispatch = useDispatch()
    const [formData, setFormData] = useState<{ email: string, password: string }>({email: '', password: ''});
-   const [errors, setErrors] = useState({});
 
-   const { loading } = useSelector((state: RootState) => state.user)
+   const { loading, errors } = useSelector((state: RootState) => state.auth);
+
+   useEffect(() => {
+      dispatch(clearValidationError());
+   }, []);
 
    const handleLogin = () => {
       dispatch(postUserLogin(formData));
@@ -32,22 +37,28 @@ const LoginPage: FunctionComponent = () => {
    return (
       <div className="container h-full px-6 py-24">
          <div className="md:w-8/12 lg:ml-6 lg:w-5/12">
-            <input
-               className="text-base text-black w-full px-4 py-2 border border-solid border-gray-300 rounded"
-               type="text"
-               required
-               placeholder="Email Address"
-               value={formData.email}
-               onChange={(e) => setFormData({...formData, email: e.target.value})}
-            />
-            <input
-               className="text-base text-black w-full px-4 py-2 border border-solid border-gray-300 rounded mt-4"
-               type="password"
-               required
-               placeholder="Password"
-               value={formData.password}
-               onChange={(e) => setFormData({...formData, password: e.target.value})}
-            />
+            <div>
+               <input
+                  className="text-base text-black w-full px-4 py-2 border border-solid border-gray-300 rounded"
+                  type="text"
+                  required
+                  placeholder="Email Address"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+               />
+               {errors?.email && <InputError message={errors.email[0]}/>}
+            </div>
+            <div>
+               <input
+                  className="text-base text-black w-full px-4 py-2 border border-solid border-gray-300 rounded mt-4"
+                  type="password"
+                  required
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+               />
+               {errors?.password && <InputError message={errors.password[0]}/>}
+            </div>
             <div className="mt-4 flex justify-between font-semibold text-base">
                <a
                   className="text-blue-600 hover:text-blue-700 hover:underline hover:underline-offset-4"
@@ -63,7 +74,7 @@ const LoginPage: FunctionComponent = () => {
                   onClick={handleLogin}
                   disabled={loading}
                >
-                  { loading && (
+                  {loading && (
                      <span className="absolute inset-0 flex items-center justify-center">
                       <svg
                          className="w-5 h-5 text-white animate-spin"
