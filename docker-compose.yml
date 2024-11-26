@@ -1,0 +1,109 @@
+services:
+  new-aggregator:
+    build:
+      context: ./backend/docker
+      dockerfile: Dockerfile
+      args:
+        WWWGROUP: '${WWWGROUP}'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '80:80'
+      - '${VITE_PORT:-5176}:${VITE_PORT:-5176}'
+    environment:
+      WWWUSER: '${WWWUSER}'
+      XDEBUG_MODE: '${XDEBUG_MODE:-off}'
+      XDEBUG_CONFIG: '${XDEBUG_CONFIG:-client_host=host.docker.internal}'
+      PHP_IDE_CONFIG: "serverName=Docker"
+    volumes:
+      - './backend:/var/www/html'
+    env_file:
+      - ./envs/backend.env
+    networks:
+      - chistel
+    depends_on:
+      - mysql
+      - redis
+  frontend-app:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        WWWGROUP: '${WWWGROUP}'
+        VITE_APP_BACKEND_ADDRESS: 'http://localhost:80/api'
+    ports:
+      - "3000:3000"
+    environment:
+      WWWUSER: '${WWWUSER}'
+      VITE_APP_BACKEND_ADDRESS: 'http://localhost:80/api'
+    volumes:
+      - ./frontend:/app
+  mysql:
+    container_name: news-aggregator-mysql
+    image: 'mysql/mysql-server:8.0'
+    ports:
+      - '${FORWARD_DB_PORT:-3306}:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: '${MYSQL_DB_PASSWORD}'
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: '${MYSQL_DB_DATABASE}'
+      MYSQL_USER: '${MYSQL_DB_USERNAME}'
+      MYSQL_PASSWORD: '${MYSQL_DB_PASSWORD}'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    volumes:
+      #- './backend/docker/mysql:/var/lib/mysql'
+      - 'cdev-mysql:/var/lib/mysql'
+      - './backend/docker/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+    networks:
+      - chistel
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-p${MYSQL_DB_PASSWORD}" ]
+      retries: 3
+      timeout: 5s
+  redis:
+    container_name: news-aggregator-redis
+    image: 'redis:alpine'
+    ports:
+      - '${FORWARD_REDIS_PORT:-6379}:6379'
+    volumes:
+      - 'cdev-redis:/data'
+    networks:
+      - chistel
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      retries: 3
+      timeout: 5s
+  queue:
+    container_name: news-aggregator-queue
+    build:
+      context: ./backend/docker
+      dockerfile: Dockerfile
+      args:
+        WWWGROUP: '${WWWGROUP}'
+    environment:
+      WWWUSER: '${WWWUSER}'
+      LARAVEL_CDEV: 1
+    volumes:
+      - './backend:/var/www/html'
+    env_file:
+      - ./envs/backend.env
+    networks:
+      - chistel
+    command: php artisan queue:work
+
+networks:
+  chistel:
+    driver: bridge
+volumes:
+  cdev-mysql:
+    driver: local
+  cdev-redis:
+    driver: local
+#  mysql:
+#    driver: local
+#  redis:
+#    driver: local
+

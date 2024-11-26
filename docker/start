@@ -1,0 +1,472 @@
+#!/usr/bin/env bash
+
+UNAMEOUT="$(uname -s)"
+
+# Verify operating system is supported...
+case "${UNAMEOUT}" in
+    Linux*)             MACHINE=linux;;
+    Darwin*)            MACHINE=mac;;
+    *)                  MACHINE="UNKNOWN"
+esac
+
+if [ "$MACHINE" == "UNKNOWN" ]; then
+    echo "Unsupported operating system [$(uname -s)]. Dev environment supports macOS, Linux, and Windows (WSL2)." >&2
+
+    exit 1
+fi
+
+# Determine if stdout is a terminal...
+if test -t 1; then
+    # Determine if colors are supported...
+    ncolors=$(tput colors)
+
+    if test -n "$ncolors" && test "$ncolors" -ge 8; then
+        BOLD="$(tput bold)"
+        YELLOW="$(tput setaf 3)"
+        GREEN="$(tput setaf 2)"
+        NC="$(tput sgr0)"
+    fi
+fi
+
+# Function that prints the available commands...
+function display_help {
+    echo "Dev Environment"
+    echo
+    echo "${YELLOW}Usage:${NC}" >&2
+    echo "  Local env COMMAND [options] [arguments]"
+    echo
+    echo "Unknown commands are passed to the docker-compose binary."
+    echo
+    echo "${YELLOW}docker-compose Commands:${NC}"
+    echo "  ${GREEN}cdev up${NC}        Start the application"
+    echo "  ${GREEN}cdev up -d${NC}     Start the application in the background"
+    echo "  ${GREEN}cdev stop${NC}      Stop the application"
+    echo "  ${GREEN}cdev restart${NC}   Restart the application"
+    echo "  ${GREEN}cdev ps${NC}        Display the status of all containers"
+    echo
+    echo "${YELLOW}Artisan Commands:${NC}"
+    echo "  ${GREEN}cdev artisan ...${NC}          Run an Artisan command"
+    echo "  ${GREEN}cdev artisan queue:work${NC}"
+    echo
+    echo "${YELLOW}PHP Commands:${NC}"
+    echo "  ${GREEN}cdev php ...${NC}   Run a snippet of PHP code"
+    echo "  ${GREEN}cdev php -v${NC}"
+    echo
+    echo "${YELLOW}Composer Commands:${NC}"
+    echo "  ${GREEN}cdev composer ...${NC}                       Run a Composer command"
+    echo "  ${GREEN}cdev composer require laravel/sanctum${NC}"
+    echo
+    echo "${YELLOW}Node Commands:${NC}"
+    echo "  ${GREEN}cdev node ...${NC}         Run a Node command"
+    echo "  ${GREEN}cdev node --version${NC}"
+    echo
+    echo "${YELLOW}NPM Commands:${NC}"
+    echo "  ${GREEN}cdev npm ...${NC}        Run a npm command"
+    echo "  ${GREEN}cdev npx${NC}            Run a npx command"
+    echo "  ${GREEN}cdev npm run prod${NC}"
+    echo
+    echo "${YELLOW}PNPM Commands:${NC}"
+    echo "  ${GREEN}cdev pnpm ...${NC}        Run a pnpm command"
+    echo "  ${GREEN}cdev pnpx${NC}            Run a pnpx command"
+    echo "  ${GREEN}cdev pnpm run prod${NC}"
+    echo
+    echo "${YELLOW}Yarn Commands:${NC}"
+    echo "  ${GREEN}cdev yarn ...${NC}        Run a Yarn command"
+    echo "  ${GREEN}cdev yarn run prod${NC}"
+    echo
+    echo "${YELLOW}Bun Commands:${NC}"
+    echo "  ${GREEN}cdev bun ...${NC}        Run a bun command"
+    echo "  ${GREEN}cdev bunx${NC}           Run a bunx command"
+    echo "  ${GREEN}cdev bun run prod${NC}"
+    echo
+    echo "${YELLOW}Database Commands:${NC}"
+    echo "  ${GREEN}cdev mysql${NC}     Start a MySQL CLI session within the 'mysql' container"
+    echo "  ${GREEN}cdev redis${NC}     Start a Redis CLI session within the 'redis' container"
+    echo
+    echo "${YELLOW}Debugging:${NC}"
+    echo "  ${GREEN}cdev debug ...${NC}          Run an Artisan command in debug mode"
+    echo "  ${GREEN}cdev debug queue:work${NC}"
+    echo
+    echo "${YELLOW}Running Tests:${NC}"
+    echo "  ${GREEN}cdev test${NC}          Run the PHPUnit tests via the Artisan test command"
+    echo "  ${GREEN}cdev phpunit ...${NC}   Run PHPUnit"
+    echo "  ${GREEN}cdev pest ...${NC}      Run Pest"
+    echo "  ${GREEN}cdev pint ...${NC}      Run Pint"
+    echo
+    echo "${YELLOW}Container CLI:${NC}"
+    echo "  ${GREEN}cdev shell${NC}        Start a shell session within the application container"
+    echo "  ${GREEN}cdev bash${NC}         Alias for 'cdev shell'"
+    echo "  ${GREEN}cdev root-shell${NC}   Start a root shell session within the application container"
+    echo "  ${GREEN}cdev root-bash${NC}    Alias for 'cdev root-shell'"
+    echo "  ${GREEN}cdev tinker${NC}       Start a new Laravel Tinker session"
+    echo
+    echo "${YELLOW}Binaries:${NC}"
+    echo "  ${GREEN}cdev bin ...${NC}   Run Composer binary scripts from the vendor/bin directory"
+    echo
+    echo "${YELLOW}Customization:${NC}"
+    echo "  ${GREEN}cdev build --no-cache${NC}       Rebuild all of the cdev containers"
+
+    exit 1
+}
+
+# Proxy the "help" command...
+if [ $# -gt 0 ]; then
+    if [ "$1" == "help" ] || [ "$1" == "-h" ] || [ "$1" == "-help" ] || [ "$1" == "--help" ]; then
+        display_help
+    fi
+else
+    display_help
+fi
+
+# Source the ".env" file so Laravel's environment variables are available...
+# shellcheck source=/dev/null
+if [ -n "$APP_ENV" ] && [ -f ./../backend/.env."$APP_ENV" ]; then
+  source ./../backend/.env."$APP_ENV";
+elif [ -f ./../backend/.env ]; then
+  source ./../backend/.env;
+fi
+
+# Define environment variables...
+export APP_PORT=${APP_PORT:-81}
+export APP_SERVICE=${APP_SERVICE:-"new-aggregator"}
+export FRONTEND_SERVICE=${FRONTEND_SERVICE:-"frontend-app"}
+export DB_PORT=${DB_PORT:-3307}
+export WWWUSER=${WWWUSER:-$UID}
+export WWWGROUP=${WWWGROUP:-$(id -g)}
+#export FEWWWGROUP=${FEWWWGROUP:-$(id -g)}
+
+# Function that outputs cdev is not running...
+function cdev_is_not_running {
+    echo "${BOLD}cdev is not running.${NC}" >&2
+    echo "" >&2
+    echo "${BOLD}You may cdev using the following commands:${NC} './vendor/bin/start up' or './vendor/bin/start up -d'" >&2
+
+    exit 1
+}
+
+# Define Docker Compose command prefix...
+if docker compose &> /dev/null; then
+    DOCKER_COMPOSE=(docker compose)
+else
+    DOCKER_COMPOSE=(docker-compose)
+fi
+
+
+EXEC="yes"
+
+if [ -z "$SAIL_SKIP_CHECKS" ]; then
+    # Ensure that Docker is running...
+    if ! docker info > /dev/null 2>&1; then
+        echo "${BOLD}Docker is not running.${NC}" >&2
+
+        exit 1
+    fi
+
+    # Determine if cdev is currently up...
+    if "${DOCKER_COMPOSE[@]}" ps "$APP_SERVICE" 2>&1 | grep 'Exit\|exited'; then
+        echo "${BOLD}Shutting down old cdev processes...${NC}" >&2
+
+        "${DOCKER_COMPOSE[@]}" down > /dev/null 2>&1
+
+        EXEC="no"
+    elif [ -z "$("${DOCKER_COMPOSE[@]}" ps -q)" ]; then
+        EXEC="no"
+    fi
+fi
+
+ARGS=()
+
+# Proxy PHP commands to the "php" binary on the application container...
+if [ "$1" == "php" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" "php")
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy vendor binary commands on the application container...
+elif [ "$1" == "bin" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        CMD=$1
+        shift 1
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" ./vendor/bin/"$CMD")
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy docker-compose commands to the docker-compose binary on the application container...
+elif [ "$1" == "docker-compose" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" "${DOCKER_COMPOSE[@]}")
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy Composer commands to the "composer" binary on the application container...
+elif [ "$1" == "composer" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" "composer")
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy Artisan commands to the "artisan" binary on the application container...
+elif [ "$1" == "artisan" ] || [ "$1" == "art" ] || [ "$1" == "a" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" php artisan)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy the "debug" command to the "php artisan" binary on the application container with xdebug enabled...
+elif [ "$1" == "debug" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev -e XDEBUG_TRIGGER=1)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" php artisan)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy the "test" command to the "php artisan test" Artisan command...
+elif [ "$1" == "test" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" php artisan test)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy the "phpunit" command to "php vendor/bin/phpunit"...
+elif [ "$1" == "phpunit" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" php vendor/bin/phpunit)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy the "pest" command to "php vendor/bin/pest"...
+elif [ "$1" == "pest" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" php vendor/bin/pest)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy the "pint" command to "php vendor/bin/pint"...
+elif [ "$1" == "pint" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" php vendor/bin/pint)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy the "dusk" command to the "php artisan dusk" Artisan command...
+elif [ "$1" == "dusk" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=(-e "APP_URL=http://${APP_SERVICE}")
+        ARGS+=(-e "DUSK_DRIVER_URL=http://selenium:4444/wd/hub")
+        ARGS+=("$APP_SERVICE" php artisan dusk)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy Node commands to the "node" binary on the application container...
+elif [ "$1" == "node" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" node)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy NPM commands to the "npm" binary on the application container...
+elif [ "$1" == "npm" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" npm)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy NPX commands to the "npx" binary on the application container...
+elif [ "$1" == "npx" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" npx)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy PNPM commands to the "pnpm" binary on the application container...
+elif [ "$1" == "pnpm" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" pnpm)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy PNPX commands to the "pnpx" binary on the application container...
+elif [ "$1" == "pnpx" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" pnpx)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy Yarn commands to the "yarn" binary on the application container...
+elif [ "$1" == "yarn" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" yarn)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy Bun commands to the "bun" binary on the application container...
+elif [ "$1" == "bun" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" bun)
+    else
+        cdev_is_not_running
+    fi
+
+# Proxy Bun X commands to the "bunx" binary on the application container...
+elif [ "$1" == "bunx" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" bunx)
+    else
+        cdev_is_not_running
+    fi
+
+elif [ "$1" == "mysql" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=(mysql bash -c)
+        ARGS+=("MYSQL_PWD=\${MYSQL_PASSWORD} mysql -u \${MYSQL_USER} \${MYSQL_DATABASE}")
+    else
+        cdev_is_not_running
+    fi
+
+# Initiate a Bash shell within the application container...
+elif [ "$1" == "backend-shell" ] || [ "$1" == "backend-bash" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" bash)
+    else
+        cdev_is_not_running
+    fi
+
+elif [ "$1" == "frontend-shell" ] || [ "$1" == "frontend-bash" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u cdev)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$FRONTEND_SERVICE" bash)
+    else
+        cdev_is_not_running
+    fi
+
+# Initiate a root user Bash shell within the application container...
+elif [ "$1" == "root-shell" ] || [ "$1" == "root-bash" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec -u root)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=("$APP_SERVICE" bash)
+    else
+        cdev_is_not_running
+    fi
+
+# Initiate a Redis CLI terminal session within the "redis" container...
+elif [ "$1" == "redis" ]; then
+    shift 1
+
+    if [ "$EXEC" == "yes" ]; then
+        ARGS+=(exec)
+        [ ! -t 0 ] && ARGS+=(-T)
+        ARGS+=(redis redis-cli)
+    else
+        cdev_is_not_running
+    fi
+fi
+
+# Run Docker Compose with the defined arguments...
+"${DOCKER_COMPOSE[@]}" "${ARGS[@]}" "$@"
