@@ -4,7 +4,9 @@
 
 ## - Project Running & Installation Guide (Docker)
 
-to run this project, please kindly _clone/download_ the `repository` before proceeding further.
+**Please note that i have compiled the setup for this with a single command.**
+
+First, kindly _clone/download_ the `repository` before proceeding further.
 
 **Note**: Please ensure you have `docker` installed on your system.
 
@@ -14,3 +16,7 @@ to run this project, please kindly _clone/download_ the `repository` before proc
 ```
 
 2. Open `http://localhost:3000` to browse through the *news-aggregator application*!
+
+
+## - The api documentation can be found in
+`http://localhost/api/documentation`
