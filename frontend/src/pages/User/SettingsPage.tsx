@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
-import { User} from '../../types';
+import { TValidationError, User } from '../../types';
 import { MultiValue } from 'react-select';
 import { mapSelectedPreferences, newsCategories, newsProviders, removeDuplicates } from '../../utils';
 import { useDispatch } from 'react-redux';
@@ -7,14 +7,17 @@ import PrimaryButton from '../../components/PrimaryButton';
 import { savePreference } from '../../redux/calls/Users/savePreference';
 import { AppDispatch } from '../../redux/store';
 import ReactSelectInput from '../../components/ReactSelectInput';
+import InputError from '../../components/InputError';
+import { clearValidationError } from '../../redux/reducers/authReducer';
 
 interface ISettingsPageProps {
    user: User | null,
    isAuthenticated?: boolean,
    loading?: boolean,
+   errors?: TValidationError | null,
 }
 
-const SettingsPage: FunctionComponent<ISettingsPageProps> = ({ user, isAuthenticated, loading }) => {
+const SettingsPage: FunctionComponent<ISettingsPageProps> = ({ user, isAuthenticated, loading, errors }) => {
    const dispatch: AppDispatch = useDispatch()
 
    const [selectedProviders, setSelectedProviders] = useState<MultiValue<{
@@ -29,6 +32,10 @@ const SettingsPage: FunctionComponent<ISettingsPageProps> = ({ user, isAuthentic
 
    const availableProviders = newsProviders();
    const availableCategories = newsCategories();
+
+   useEffect(() => {
+      dispatch(clearValidationError());
+   }, []);
 
    useEffect(() => {
       if (user?.preference) {
@@ -76,7 +83,7 @@ const SettingsPage: FunctionComponent<ISettingsPageProps> = ({ user, isAuthentic
 
                <div className="mt-5 md:mt-0 md:col-span-2">
                   <div className="px-4 py-5 bg-white dark:bg-gray-800 sm:p-6 shadow sm:rounded-tl-md sm:rounded-tr-md">
-                     <div className="grid grid-cols-6 gap-6">
+                     <div className="grid grid-cols-6 gap-6 mt-4">
                         <ReactSelectInput
                            id="providers"
                            label="Providers"
@@ -85,6 +92,9 @@ const SettingsPage: FunctionComponent<ISettingsPageProps> = ({ user, isAuthentic
                            onChange={handleSelectChange(setSelectedProviders, availableProviders)}
                            isMultiple
                         />
+                        {errors?.providers && <InputError message={errors.providers[0]}/>}
+                     </div>
+                     <div className="grid grid-cols-6 gap-6 mt-4">
                         <ReactSelectInput
                            id="categories"
                            label="Categories"
@@ -93,6 +103,8 @@ const SettingsPage: FunctionComponent<ISettingsPageProps> = ({ user, isAuthentic
                            onChange={handleSelectChange(setSelectedCategories, availableCategories)}
                            isMultiple
                         />
+                        {errors?.categories && <InputError message={errors.categories[0]}/>}
+
                      </div>
                   </div>
 

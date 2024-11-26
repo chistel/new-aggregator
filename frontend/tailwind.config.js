@@ -1,4 +1,3 @@
-import { fontFamily } from 'tailwindcss/defaultTheme'
 import colors from 'tailwindcss/colors'
 import form from '@tailwindcss/forms'
 /** @type {import('tailwindcss').Config} */
@@ -11,9 +10,6 @@ export default {
         12: '3rem',
         13: '3.25rem',
         14: '3.5rem',
-      },
-      fontFamily: {
-        sans: ['var(--font-space-grotesk)', ...fontFamily.sans],
       },
       colors: {
         primary: colors.pink,

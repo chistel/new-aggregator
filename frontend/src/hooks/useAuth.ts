@@ -5,7 +5,7 @@ import { fetchUser } from '../redux/calls/Users/fetchUser';
 
 const useAuth = () => {
    const dispatch: AppDispatch = useDispatch();
-   const { user, isAuthenticated, loading } = useSelector((state: RootState) => state.auth);
+   const { user, isAuthenticated, loading, errors } = useSelector((state: RootState) => state.auth);
 
    useEffect(() => {
       if (!isAuthenticated || (isAuthenticated && !user)) {
@@ -13,7 +13,7 @@ const useAuth = () => {
       }
    }, [isAuthenticated, dispatch]);
 
-   return {user, isAuthenticated, loading};
+   return { user, isAuthenticated, loading, errors };
 };
 
 export default useAuth;

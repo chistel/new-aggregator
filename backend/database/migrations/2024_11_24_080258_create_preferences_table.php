@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->uuid();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->json('sources')->nullable();
+            $table->json('providers')->nullable();
             $table->json('categories')->nullable();
             $table->json('authors')->nullable();
             $table->timestamps();

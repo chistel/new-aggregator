@@ -10,8 +10,8 @@ interface ISelectInputProps {
    onChange: (newValue: MultiValue<{ value: string; label: string }>) => void;
 }
 const ReactSelectInput: FunctionComponent<ISelectInputProps> = ({ isMultiple, id, label, availableOptions, selectedValues, onChange }) => (
-   <div className="col-span-6 sm:col-span-6">
-      <label htmlFor={id} className="block font-medium text-sm text-gray-700 dark:text-gray-300">
+   <div className="col-span-6 sm:col-span-6 text-gray-700 dark:text-gray-500">
+      <label htmlFor={id} className="block font-medium text-sm mb-3">
          {label}
       </label>
       <div>

@@ -1,5 +1,5 @@
 import { AppDispatch } from '../../store';
-import {setUser, userError, userValidationError} from '../../reducers/authReducer';
+import { setUser, userError, userValidationError } from '../../reducers/authReducer';
 import apiClient from '../../../services/api';
 import { userLogin } from '../../action';
 import { isAxiosError } from '../../../utils';

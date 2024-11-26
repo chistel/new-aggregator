@@ -13,7 +13,7 @@ import ForgetPasswordPage from './pages/Authentication/ForgetPasswordPage';
 
 function App() {
    const dispatch = useDispatch()
-   const {user, isAuthenticated, loading} = useAuth();
+   const { user, isAuthenticated, loading, errors } = useAuth();
 
    return (
       <>
@@ -45,7 +45,7 @@ function App() {
                   }/>
                   <Route path="/user/settings" element={
                      isAuthenticated === true ? (
-                        <SettingsPage user={user} isAuthenticated={isAuthenticated} loading={loading}/>
+                        <SettingsPage user={user} isAuthenticated={isAuthenticated} loading={loading} errors={errors}/>
                      ) : (
                         <Navigate replace to={"/"}/>
                      )
