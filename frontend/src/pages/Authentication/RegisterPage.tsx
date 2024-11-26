@@ -3,7 +3,8 @@ import { AppDispatch, RootState } from '../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { processRegister } from '../../redux/calls/Users/registerUser';
 import InputError from "../../components/InputError";
-import { clearValidationError } from '../../redux/reducers/authReducer';
+import { clearValidationError, clearUserError } from '../../redux/reducers/authReducer';
+import ErrorBanner from '../../components/ErrorBanner';
 
 const RegisterPage: FunctionComponent = () => {
 
@@ -11,11 +12,12 @@ const RegisterPage: FunctionComponent = () => {
    const [formData, setFormData] = useState<{ email: string, password: string }>({email: '', password: ''});
 
 
-   const { loading, errors } = useSelector((state: RootState) => state.auth);
+   const { loading, errors, error } = useSelector((state: RootState) => state.auth);
 
    useEffect(() => {
       dispatch(clearValidationError());
-   }, []);
+      dispatch(clearUserError());
+   }, [dispatch]);
 
    const handleRegistration = (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -32,7 +34,15 @@ const RegisterPage: FunctionComponent = () => {
 
    return (
       <div className="container h-full px-6 py-24">
-         <div className="md:w-8/12 lg:ml-6 lg:w-5/12">
+         {!loading && error !== undefined && (
+            <div className="my-3">
+               <ErrorBanner>
+                  <p className="text-base font-semibold">Login Error</p>
+                  <p>{error.message}</p>
+               </ErrorBanner>
+            </div>
+         )}
+         <div className="md:w-8/12 lg:w-5/12">
             <form method="POST" onSubmit={handleRegistration}>
                <div>
                   <input

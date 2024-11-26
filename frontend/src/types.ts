@@ -6,9 +6,6 @@ export type TMeta = {
    per_page?: number;
    to?: number;
    total?: number;
-   errors?: {
-      [key: string]: string[];
-   };
 };
 
 export type TValidationError = {

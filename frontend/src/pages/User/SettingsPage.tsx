@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
-import { TValidationError, User } from '../../types';
+import { TError, TValidationError, User } from '../../types';
 import { MultiValue } from 'react-select';
 import { mapSelectedPreferences, newsCategories, newsProviders, removeDuplicates } from '../../utils';
 import { useDispatch } from 'react-redux';
@@ -9,15 +9,18 @@ import { AppDispatch } from '../../redux/store';
 import ReactSelectInput from '../../components/ReactSelectInput';
 import InputError from '../../components/InputError';
 import { clearValidationError } from '../../redux/reducers/authReducer';
+import SuccessBanner from "../../components/SuccessBanner";
 
 interface ISettingsPageProps {
    user: User | null,
    isAuthenticated?: boolean,
    loading?: boolean,
    errors?: TValidationError | null,
+   error?: TError | null,
+   updated: boolean | undefined,
 }
 
-const SettingsPage: FunctionComponent<ISettingsPageProps> = ({ user, isAuthenticated, loading, errors }) => {
+const SettingsPage: FunctionComponent<ISettingsPageProps> = ({ user, isAuthenticated, loading, errors, error, updated }) => {
    const dispatch: AppDispatch = useDispatch()
 
    const [selectedProviders, setSelectedProviders] = useState<MultiValue<{
@@ -72,6 +75,9 @@ const SettingsPage: FunctionComponent<ISettingsPageProps> = ({ user, isAuthentic
 
    return (
       <div className="container h-full px-6 py-10">
+         { !loading && updated && (<SuccessBanner>
+            <p className="text-lg font-semibold">Preference saved</p>
+         </SuccessBanner>)}
          <div className="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
             <div className="md:grid md:grid-cols-3 md:gap-6">
                <div className="md:col-span-1 flex justify-between">

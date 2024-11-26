@@ -1,5 +1,5 @@
 import { AppDispatch } from '../../store';
-import { clearUser, setUser, userError, userValidationError } from '../../reducers/authReducer';
+import { clearUser, setUpdated, setUser, userError, userValidationError } from '../../reducers/authReducer';
 import apiClient from '../../../services/api';
 import { userSavePreference } from '../../action';
 import { isAxiosError } from '../../../utils';
@@ -9,6 +9,7 @@ export const savePreference = (payload: { providers: string[], categories: strin
    try {
       const response = await apiClient.post(`${import.meta.env.VITE_APP_BACKEND_ADDRESS}/user/preferences`, payload);
       dispatch(setUser(response.data.data));
+      dispatch(setUpdated());
    } catch (error) {
       if (isAxiosError(error)) {
          if (error.response?.status === 422) {

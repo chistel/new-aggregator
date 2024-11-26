@@ -1,19 +1,21 @@
 import React, {ChangeEvent, FunctionComponent, useCallback, useEffect, useState} from 'react';
-import { postUserLogin } from '../../redux/calls/Users/processLogin';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../redux/store';
+import {postUserLogin} from '../../redux/calls/Users/processLogin';
+import {useDispatch, useSelector} from 'react-redux';
+import {AppDispatch, RootState} from '../../redux/store';
 import InputError from '../../components/InputError';
-import { clearValidationError } from '../../redux/reducers/authReducer';
+import { clearUserError, clearValidationError } from '../../redux/reducers/authReducer';
+import ErrorBanner from '../../components/ErrorBanner';
 
 const LoginPage: FunctionComponent = () => {
    const dispatch: AppDispatch = useDispatch()
    const [formData, setFormData] = useState<{ email: string, password: string }>({email: '', password: ''});
 
-   const { loading, errors } = useSelector((state: RootState) => state.auth);
+   const {loading, errors, error} = useSelector((state: RootState) => state.auth);
 
    useEffect(() => {
       dispatch(clearValidationError());
-   }, []);
+      dispatch(clearUserError());
+   }, [dispatch]);
 
    const handleLogin = () => {
       dispatch(postUserLogin(formData));
@@ -36,7 +38,15 @@ const LoginPage: FunctionComponent = () => {
 
    return (
       <div className="container h-full px-6 py-24">
-         <div className="md:w-8/12 lg:ml-6 lg:w-5/12">
+         {!loading && error !== undefined && (
+            <div className="my-3">
+               <ErrorBanner>
+                  <p className="text-base font-semibold">Login Error</p>
+                  <p>{error.message}</p>
+               </ErrorBanner>
+            </div>
+         )}
+         <div className="md:w-8/12 lg:w-5/12">
             <div>
                <input
                   className="text-base text-black w-full px-4 py-2 border border-solid border-gray-300 rounded"

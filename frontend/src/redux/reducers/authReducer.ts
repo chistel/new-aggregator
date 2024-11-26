@@ -7,6 +7,7 @@ const initialState: AuthState = {
    loading: false,
    error: undefined,
    errors: null,
+   updated: false,
    isAuthenticated: sessionStorage.getItem('token') !== null,
 };
 
@@ -20,6 +21,9 @@ const { actions, reducer } = createSlice({
          state.isAuthenticated = true;
          state.errors = null;
       },
+      setUpdated(state) {
+         state.updated = true;
+      },
       userValidationError: (state, {payload}) => {
          state.loading = false;
          state.errors = payload.errors;
@@ -30,6 +34,9 @@ const { actions, reducer } = createSlice({
       },
       clearValidationError(state) {
          state.errors = null;
+      },
+      clearUserError(state) {
+         state.error = undefined;
       },
       clearUser(state) {
          state.loading = false;
@@ -57,6 +64,6 @@ const { actions, reducer } = createSlice({
    },
 });
 
-export const { setUser, clearUser, userError, userValidationError, clearValidationError } = actions;
+export const { setUser, setUpdated, clearUser, userError, clearUserError, userValidationError, clearValidationError } = actions;
 
 export default reducer;

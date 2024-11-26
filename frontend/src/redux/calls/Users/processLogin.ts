@@ -3,6 +3,7 @@ import { setUser, userError, userValidationError } from '../../reducers/authRedu
 import apiClient from '../../../services/api';
 import { userLogin } from '../../action';
 import { isAxiosError } from '../../../utils';
+import { TError } from '../../../types';
 
 export const postUserLogin = (payload: { email: string, password: string }) => async (dispatch: AppDispatch) => {
    dispatch(userLogin())
@@ -19,10 +20,12 @@ export const postUserLogin = (payload: { email: string, password: string }) => a
 
       dispatch(setUser(data))
    } catch (error) {
-      if (isAxiosError(error) && error.response?.status === 422) {
-         dispatch(userValidationError(error.response.data))
-      } else {
-         dispatch(userError(error))
+      if (isAxiosError(error)) {
+         if (error.response?.status === 422) {
+            dispatch(userValidationError(error.response.data));
+         }else {
+            dispatch(userError(error.response?.data as TError));
+         }
       }
    }
 }
