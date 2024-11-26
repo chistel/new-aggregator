@@ -6,6 +6,7 @@ const initialState: AuthState = {
    token: null,
    loading: false,
    error: undefined,
+   errors: null,
    isAuthenticated: sessionStorage.getItem('token') !== null,
 };
 
@@ -17,6 +18,11 @@ const { actions, reducer } = createSlice({
          state.user = action.payload;
          state.loading = false;
          state.isAuthenticated = true;
+         state.errors = null;
+      },
+      userValidationError: (state, {payload}) => {
+         state.loading = false;
+         state.errors = payload.errors;
       },
       userError: (state, {payload}) => {
          state.loading = false;
@@ -27,6 +33,7 @@ const { actions, reducer } = createSlice({
          state.user = null;
          state.token = null;
          state.isAuthenticated = false;
+         state.errors = null;
       },
    },
    extraReducers: (builder) => {
@@ -34,12 +41,15 @@ const { actions, reducer } = createSlice({
          .addCase('@user/SavePreference', (state) => {
             state.loading = true;
             state.error = undefined;
+            state.errors = null;
          }).addCase('@user/Login', (state) => {
          state.loading = true;
          state.error = undefined;
+         state.errors = null;
       }).addCase('@user/Register', (state) => {
          state.loading = true;
          state.error = undefined;
+         state.errors = null;
       });
    },
 });

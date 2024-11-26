@@ -11,6 +11,9 @@ export type TMeta = {
    };
 };
 
+export type TValidationError = {
+   [key: string]: string[];
+};
 
 export type TCommon = {
    loading?: boolean;
@@ -69,6 +72,7 @@ export type AuthState = TCommon & {
    user: null | User;
    token: string | null;
    isAuthenticated: boolean;
+   errors: TValidationError | null;
 }
 
 
@@ -81,4 +85,5 @@ export type NewsState = TCommon & {
 export type UserNewsState = TCommon & {
    all: Article[];
    loading: boolean;
+   errors: TValidationError | null;
 }
