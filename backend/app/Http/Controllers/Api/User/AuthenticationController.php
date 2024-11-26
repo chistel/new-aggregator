@@ -62,9 +62,12 @@ class AuthenticationController extends BaseController
             'password' => Hash::make($request->password),
         ]);
 
+        $token = $user->createToken('NewsAggregatorToken')->plainTextToken;
+
+
         event(new UserRegisteredEvent($user));
 
-        return new UserResource($user->refresh());
+        return new UserResource($user->refresh(), $token);
     }
 
     /**

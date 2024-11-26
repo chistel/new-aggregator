@@ -1,15 +1,15 @@
-import {useDispatch} from "react-redux";
-// import { userHasLoggedIn } from "./actions/userAction";
-import {Navigate, Route, Routes} from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import SectionContainer from "./components/SectionContainer";
-import RegisterPage from "./pages/Authentication/RegisterPage";
-import LoginPage from "./pages/Authentication/LoginPage";
-import useAuth from "./hooks/useAuth";
-import SettingsPage from "./pages/User/SettingsPage";
-import PersonalizedArticlesPage from "./pages/User/PersonalizedArticlesPage";
+import { useDispatch } from 'react-redux';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import SectionContainer from './components/SectionContainer';
+import RegisterPage from './pages/Authentication/RegisterPage';
+import LoginPage from './pages/Authentication/LoginPage';
+import useAuth from './hooks/useAuth';
+import SettingsPage from './pages/User/SettingsPage';
+import PersonalizedArticlesPage from './pages/User/PersonalizedArticlesPage';
+import ForgetPasswordPage from './pages/Authentication/ForgetPasswordPage';
 
 function App() {
    const dispatch = useDispatch()
@@ -26,17 +26,24 @@ function App() {
                      !isAuthenticated ? (
                         <RegisterPage/>
                      ) : (
-                        <Navigate replace to={"/"}/>
+                        <Navigate replace to={"/article/personalised"}/>
                      )
                   }/>
                   <Route path="user/login" element={
                      !isAuthenticated ? (
                         <LoginPage/>
                      ) : (
-                        <Navigate replace to={"/"}/>
+                        <Navigate replace to={"/article/personalised"}/>
                      )
                   }/>
-                  <Route path="user/settings" element={
+                  <Route path="/user/forget-password" element={
+                     !isAuthenticated ? (
+                        <ForgetPasswordPage/>
+                     ) : (
+                        <Navigate replace to={"/article/personalised"}/>
+                     )
+                  }/>
+                  <Route path="/user/settings" element={
                      isAuthenticated === true ? (
                         <SettingsPage user={user} isAuthenticated={isAuthenticated} loading={loading}/>
                      ) : (
@@ -44,7 +51,7 @@ function App() {
                      )
                   }/>
 
-                  <Route path="article/personalised" element={
+                  <Route path="/article/personalised" element={
                      isAuthenticated === true ? (
                         <PersonalizedArticlesPage user={user} isAuthenticated={isAuthenticated} loading={loading}/>
                      ) : (

@@ -33,15 +33,17 @@ const LoginPage: FunctionComponent = () => {
       <div className="container h-full px-6 py-24">
          <div className="md:w-8/12 lg:ml-6 lg:w-5/12">
             <input
-               className="text-base w-full px-4 py-2 border border-solid border-gray-300 rounded"
+               className="text-base text-black w-full px-4 py-2 border border-solid border-gray-300 rounded"
                type="text"
+               required
                placeholder="Email Address"
                value={formData.email}
                onChange={(e) => setFormData({...formData, email: e.target.value})}
             />
             <input
-               className="text-base w-full px-4 py-2 border border-solid border-gray-300 rounded mt-4"
+               className="text-base text-black w-full px-4 py-2 border border-solid border-gray-300 rounded mt-4"
                type="password"
+               required
                placeholder="Password"
                value={formData.password}
                onChange={(e) => setFormData({...formData, password: e.target.value})}
@@ -85,7 +87,7 @@ const LoginPage: FunctionComponent = () => {
                       </svg>
                     </span>
                   )}
-                  <span className={loading ? "opacity-0" : ""}>Login</span>
+                  <span className={loading ? "opacity-50" : ""}>Login</span>
                </button>
             </div>
             <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-left">
