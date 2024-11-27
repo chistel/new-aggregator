@@ -15,6 +15,11 @@ class NYTimesService implements NewsSourceService
 
     public function __construct(protected string $apiKey) {}
 
+    public function providerName(): string
+    {
+        return 'nyt';
+    }
+
     public function fetchArticles(): Collection
     {
         $response = Http::get("$this->baseUrl/home.json", [

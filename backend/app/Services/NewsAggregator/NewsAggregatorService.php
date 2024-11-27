@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\NewsAggregator;
 
-use App\Contracts\NewsSourceService;
 use Illuminate\Support\Collection;
 
-class NewsAggregatorService implements NewsSourceService
+class NewsAggregatorService
 {
     public function __construct(protected array $providers = []) {}
 

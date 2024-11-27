@@ -15,6 +15,6 @@ class FetchArticlesCommand extends Command
 
     public function handle(): void
     {
-        dispatch(new PullArticlesJob)->delay(3);
+        PullArticlesJob::dispatch();
     }
 }

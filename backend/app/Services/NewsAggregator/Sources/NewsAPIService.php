@@ -15,6 +15,11 @@ class NewsAPIService implements NewsSourceService
 
     public function __construct(protected string $apiKey) {}
 
+    public function providerName(): string
+    {
+        return 'news-api';
+    }
+
     public function fetchArticles(): Collection
     {
         $response = Http::get("$this->baseUrl/everything", [
@@ -25,8 +30,6 @@ class NewsAPIService implements NewsSourceService
         if ($response->successful()) {
             return collect($response->json('articles'))->filter(function ($article) {
                 return
-                    Arr::get($article, 'source.name') &&
-                    $article['author'] &&
                     $article['title'] &&
                     $article['description'] &&
                     $article['urlToImage'] &&
@@ -36,7 +39,7 @@ class NewsAPIService implements NewsSourceService
                     'title' => str_contains($article['title'], '-') ? trim(substr($article['title'], 0, strrpos($article['title'], '-'))) : $article['title'],
                     'provider' => 'news-api',
                     'source' => Arr::get($article, 'source.name'),
-                    'author' => $article['author'],
+                    'author' => $article['author'] ?? null,
                     'description' => $article['description'],
                     'content' => $article['content'],
                     'url' => $article['url'],

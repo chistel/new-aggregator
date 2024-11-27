@@ -8,6 +8,8 @@ use Illuminate\Support\Collection;
 
 interface NewsSourceService
 {
+    public function providerName(): string;
+
     /**
      * Fetch articles from the news source.
      */

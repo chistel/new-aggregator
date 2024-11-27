@@ -64,7 +64,6 @@ class AuthenticationController extends BaseController
 
         $token = $user->createToken('NewsAggregatorToken')->plainTextToken;
 
-
         event(new UserRegisteredEvent($user));
 
         return new UserResource($user->refresh(), $token);
@@ -121,7 +120,7 @@ class AuthenticationController extends BaseController
             return new UserResource($user->refresh(), $token);
         }
 
-        return $this->sendError(message:'Invalid Login details', code: 401);
+        return $this->sendError(message: 'Invalid Login details', code: 401);
     }
 
     /**

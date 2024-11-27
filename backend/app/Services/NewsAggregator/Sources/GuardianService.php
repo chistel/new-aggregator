@@ -15,6 +15,11 @@ class GuardianService implements NewsSourceService
 
     public function __construct(protected string $apiKey) {}
 
+    public function providerName(): string
+    {
+        return 'guardian';
+    }
+
     public function fetchArticles(): Collection
     {
         $response = Http::get("$this->baseUrl/search", [
