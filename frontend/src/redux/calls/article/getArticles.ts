@@ -6,8 +6,15 @@ import apiClient from '../../../services/api';
 
 export const fetchArticles = (page: number = 1, keyword: string = '', date: string = '', provider: string | null = '') => async (dispatch: AppDispatch) => {
    dispatch(getArticles());
+   const params = new URLSearchParams();
+
+   if (page) params.append('page', String(page));
+   if (keyword) params.append('keyword', keyword);
+   if (date) params.append('date', date);
+   if (provider) params.append('provider', provider);
+
    try {
-      const response = await apiClient.get(`${import.meta.env.VITE_APP_BACKEND_ADDRESS}/articles?page=${page}&keyword=${keyword}&date=${date}&provider=${provider}`);
+      const response = await apiClient.get(`${import.meta.env.VITE_APP_BACKEND_ADDRESS}/articles?${params.toString()}`);
       dispatch(setArticles(response.data));
    } catch (error: any) {
       dispatch(fetchingError(error.response?.data?.message || 'Failed to fetch articles'));

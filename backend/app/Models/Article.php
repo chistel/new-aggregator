@@ -54,9 +54,15 @@ class Article extends Model
             ->orWhere('description', 'like', '%'.$keyword.'%') : $query;
     }
 
-    public function scopeFilterByProvider(Builder $query, ?string $source = null): Builder
+    public function scopeFilterByProvider(Builder $query, ?string $provider = null): Builder
     {
-        return $source ? $query->where('provider', $source) : $query;
+        $provider = trim((string) $provider);
+
+        if (!empty($provider)) {
+            $query->where('provider', $provider);
+        }
+
+        return $query;
     }
 
     public function scopeFilterByCategory(Builder $query, ?string $category = null): Builder

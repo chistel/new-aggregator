@@ -97,9 +97,9 @@ class ArticleController extends BaseController
     {
         $articles = Article::query()
             ->latest()
-            ->filterByKeyword($request->keyword)
-            ->filterByProvider($request->provider)
-            ->filterByCategory($request->category)
+            ->filterByKeyword($request->get('keyword',))
+            ->filterByProvider($request->get('provider'))
+            ->filterByCategory($request->get('category'))
             ->filterByDate($request->date)
             ->paginate(10);
 
