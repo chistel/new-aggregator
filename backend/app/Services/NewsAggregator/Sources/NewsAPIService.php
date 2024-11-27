@@ -22,7 +22,7 @@ class NewsAPIService implements NewsSourceService
 
     public function fetchArticles(): Collection
     {
-        $response = Http::get("$this->baseUrl/everything", [
+        $response = Http::get("$this->baseUrl/top-headlines", [
             'apiKey' => $this->apiKey,
             'language' => 'en',
         ]);

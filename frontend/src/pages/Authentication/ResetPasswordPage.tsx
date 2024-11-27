@@ -1,22 +1,27 @@
 import React, { ChangeEvent, FormEvent, FunctionComponent, useCallback, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import AuthenticationCard from '../../components/AuthenticationCard';
 import { AppDispatch, RootState } from '../../redux/store';
 import InputError from "../../components/InputError";
-import { passwordResetRequest } from '../../redux/calls/Users/passwordResetRequest';
 import ErrorBanner from '../../components/ErrorBanner';
 import SuccessBanner from '../../components/SuccessBanner';
 
-const ForgetPasswordPage: FunctionComponent = () => {
-   const dispatch: AppDispatch = useDispatch()
-   const [formData, setFormData] = useState<{ email: string}>({email: ''});
+const ResetPasswordPage: FunctionComponent = () => {
+   const dispatch: AppDispatch = useDispatch();
+   const location = useLocation();
+   const navigate = useNavigate();
+   const [formData, setFormData] = useState<{ password: string, password_confirmation: string}>({ password: '', password_confirmation: ''});
+
+   const token = new URLSearchParams(location.search).get('token');
+   const email = new URLSearchParams(location.search).get('email');
 
    const { loading, errors, error, successful } = useSelector((state: RootState) => state.auth)
 
    const handleRequest= useCallback((e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      dispatch(passwordResetRequest(formData));
-   }, [dispatch, passwordResetRequest, formData]);
+      // dispatch(passwordResetRequest(formData));
+   }, [dispatch, formData]);
 
 
    return (
@@ -42,17 +47,28 @@ const ForgetPasswordPage: FunctionComponent = () => {
          </div>
          <form method="POST" onSubmit={handleRequest}>
             <div>
-               <label htmlFor="email" className="block text-sm font-bold ml-1 mb-2 dark:text-white">Email
-                  Address</label>
+               <label htmlFor="password" className="block text-sm font-bold ml-1 mb-2 dark:text-white">Password</label>
                <div>
-                  <input type="email" id="email" name="email" placeholder="Email address"
+                  <input type="password" id="password" name="password" placeholder="Password"
                          className="py-2 px-4 block w-full border-2 border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm"
                          required aria-describedby="email-error"
-                         value={formData.email}
-                         onChange={(e) => setFormData({...formData, email: e.target.value})}
+                         value={formData.password}
+                         onChange={(e) => setFormData({...formData, password: e.target.value})}
                   />
                </div>
-               {errors?.email && <InputError message={errors.email[0]}/>}
+               {errors?.password && <InputError message={errors.password[0]}/>}
+            </div>
+            <div>
+               <label htmlFor="password_confirmation" className="block text-sm font-bold ml-1 mb-2 dark:text-white">Password</label>
+               <div>password_confirmation
+                  <input type="password" id="password_confirmation" name="password_confirmation" placeholder="Confirm password"
+                         className="py-2 px-4 block w-full border-2 border-gray-200 rounded-md text-sm focus:border-blue-500 focus:ring-blue-500 shadow-sm"
+                         required aria-describedby="email-error"
+                         value={formData.password_confirmation}
+                         onChange={(e) => setFormData({...formData, password_confirmation: e.target.value})}
+                  />
+               </div>
+               {errors?.password_confirmation && <InputError message={errors.password_confirmation[0]}/>}
             </div>
             <div className="flex items-center justify-end mt-4">
                <button type="submit"
@@ -65,4 +81,4 @@ const ForgetPasswordPage: FunctionComponent = () => {
    );
 };
 
-export default ForgetPasswordPage;
+export default ResetPasswordPage;

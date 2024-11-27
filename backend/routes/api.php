@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'user'], function () {
     Route::post('/register', [AuthenticationController::class, 'register']);
     Route::post('/login', [AuthenticationController::class, 'login']);
+    Route::group(['prefix' => 'password-reset'], function () {
+        Route::post('/request', [PasswordResetController::class, 'sendResetLinkEmail']);
+        Route::post('/change', [PasswordResetController::class, 'resetPassword']);
+    });
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', function (Request $request) {
             return new UserResource($request->user());

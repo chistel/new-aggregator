@@ -19,6 +19,7 @@ export type TCommon = {
    meta?: TMeta;
    updating?: boolean;
    updated?: boolean;
+   successful?: boolean
 };
 
 export type TError = {

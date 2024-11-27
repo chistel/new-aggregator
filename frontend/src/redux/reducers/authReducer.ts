@@ -8,6 +8,7 @@ const initialState: AuthState = {
    error: undefined,
    errors: null,
    updated: false,
+   successful: false,
    isAuthenticated: sessionStorage.getItem('token') !== null,
 };
 
@@ -24,19 +25,28 @@ const { actions, reducer } = createSlice({
       setUpdated(state) {
          state.updated = true;
       },
+      setUserSuccess: (state, {payload}) => {
+         state.loading = false;
+         state.errors = null;
+         state.successful = true;
+      },
       userValidationError: (state, {payload}) => {
          state.loading = false;
          state.errors = payload.errors;
+         state.successful = false;
       },
       userError: (state, {payload}) => {
          state.loading = false;
          state.error = payload;
+         state.successful = false;
       },
       clearValidationError(state) {
          state.errors = null;
+         state.successful = false;
       },
       clearUserError(state) {
          state.error = undefined;
+         state.successful = false;
       },
       clearUser(state) {
          state.loading = false;
@@ -44,6 +54,7 @@ const { actions, reducer } = createSlice({
          state.token = null;
          state.isAuthenticated = false;
          state.errors = null;
+         state.successful = false;
       },
    },
    extraReducers: (builder) => {
@@ -60,10 +71,14 @@ const { actions, reducer } = createSlice({
          state.loading = true;
          state.error = undefined;
          state.errors = null;
+      }).addCase('@user/PasswordResetRequest', (state) => {
+         state.loading = true;
+         state.error = undefined;
+         state.errors = null;
       });
    },
 });
 
-export const { setUser, setUpdated, clearUser, userError, clearUserError, userValidationError, clearValidationError } = actions;
+export const { setUser, setUpdated, setUserSuccess, clearUser, userError, clearUserError, userValidationError, clearValidationError } = actions;
 
 export default reducer;

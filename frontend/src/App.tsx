@@ -10,6 +10,7 @@ import useAuth from './hooks/useAuth';
 import SettingsPage from './pages/User/SettingsPage';
 import PersonalizedArticlesPage from './pages/User/PersonalizedArticlesPage';
 import ForgetPasswordPage from './pages/Authentication/ForgetPasswordPage';
+import ResetPasswordPage from './pages/Authentication/ResetPasswordPage';
 
 function App() {
    const dispatch = useDispatch()
@@ -39,6 +40,13 @@ function App() {
                   <Route path="/user/forget-password" element={
                      !isAuthenticated ? (
                         <ForgetPasswordPage/>
+                     ) : (
+                        <Navigate replace to={"/article/personalised"}/>
+                     )
+                  }/>
+                  <Route path="/user/reset-password" element={
+                     !isAuthenticated ? (
+                        <ResetPasswordPage/>
                      ) : (
                         <Navigate replace to={"/article/personalised"}/>
                      )
