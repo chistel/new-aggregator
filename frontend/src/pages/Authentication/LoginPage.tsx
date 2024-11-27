@@ -1,10 +1,12 @@
-import React, {ChangeEvent, FunctionComponent, useCallback, useEffect, useState} from 'react';
-import {postUserLogin} from '../../redux/calls/Users/processLogin';
-import {useDispatch, useSelector} from 'react-redux';
-import {AppDispatch, RootState} from '../../redux/store';
+import React, { ChangeEvent, FunctionComponent, useCallback, useEffect, useState } from 'react';
+import { postUserLogin } from '../../redux/calls/Users/processLogin';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../redux/store';
 import InputError from '../../components/InputError';
 import { clearUserError, clearValidationError } from '../../redux/reducers/authReducer';
 import ErrorBanner from '../../components/ErrorBanner';
+import AuthenticationCard from '../../components/AuthenticationCard';
+import { Link } from 'react-router-dom';
 
 const LoginPage: FunctionComponent = () => {
    const dispatch: AppDispatch = useDispatch()
@@ -37,7 +39,7 @@ const LoginPage: FunctionComponent = () => {
    // }, [loading]);
 
    return (
-      <div className="container h-full px-6 py-24">
+      <AuthenticationCard>
          {!loading && error !== undefined && (
             <div className="my-3">
                <ErrorBanner>
@@ -46,7 +48,7 @@ const LoginPage: FunctionComponent = () => {
                </ErrorBanner>
             </div>
          )}
-         <div className="md:w-8/12 lg:w-5/12">
+         <div>
             <div>
                <input
                   className="text-base text-black w-full px-4 py-2 border border-solid border-gray-300 rounded"
@@ -69,17 +71,15 @@ const LoginPage: FunctionComponent = () => {
                />
                {errors?.password && <InputError message={errors.password[0]}/>}
             </div>
-            <div className="mt-4 flex justify-between font-semibold text-base">
-               <a
+            <div className="flex items-center justify-end mt-4">
+               <Link
                   className="text-blue-600 hover:text-blue-700 hover:underline hover:underline-offset-4"
-                  href="#"
+                  to="/user/forget-password"
                >
                   Forgot Password?
-               </a>
-            </div>
-            <div className="text-center md:text-right">
+               </Link>
                <button
-                  className="mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white uppercase rounded text-xs tracking-wider disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="ms-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white uppercase rounded text-xs tracking-wider disabled:bg-gray-400 disabled:cursor-not-allowed"
                   type="submit"
                   onClick={handleLogin}
                   disabled={loading}
@@ -111,17 +111,8 @@ const LoginPage: FunctionComponent = () => {
                   <span className={loading ? "opacity-50" : ""}>Login</span>
                </button>
             </div>
-            <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-left">
-               Don't have an account?{" "}
-               <a
-                  className="text-red-600 hover:underline hover:underline-offset-4"
-                  href="/user/register"
-               >
-                  Register
-               </a>
-            </div>
          </div>
-      </div>
+      </AuthenticationCard>
    );
 };
 

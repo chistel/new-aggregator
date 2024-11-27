@@ -5,6 +5,8 @@ import { processRegister } from '../../redux/calls/Users/registerUser';
 import InputError from "../../components/InputError";
 import { clearValidationError, clearUserError } from '../../redux/reducers/authReducer';
 import ErrorBanner from '../../components/ErrorBanner';
+import AuthenticationCard from '../../components/AuthenticationCard';
+import { Link } from 'react-router-dom';
 
 const RegisterPage: FunctionComponent = () => {
 
@@ -33,7 +35,7 @@ const RegisterPage: FunctionComponent = () => {
    }, []);
 
    return (
-      <div className="container h-full px-6 py-24">
+      <AuthenticationCard>
          {!loading && error !== undefined && (
             <div className="my-3">
                <ErrorBanner>
@@ -42,7 +44,7 @@ const RegisterPage: FunctionComponent = () => {
                </ErrorBanner>
             </div>
          )}
-         <div className="md:w-8/12 lg:w-5/12">
+         <div>
             <form method="POST" onSubmit={handleRegistration}>
                <div>
                   <input
@@ -66,9 +68,18 @@ const RegisterPage: FunctionComponent = () => {
                   />
                   {errors?.password && <InputError message={errors.password[0]}/> }
                </div>
-               <div className="text-center md:text-left">
+               <div className="flex items-center justify-end mt-4">
+                  <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-left">
+                     have an account?{" "}
+                     <Link
+                        className="text-red-600 hover:underline hover:underline-offset-4"
+                        to="/user/login"
+                     >
+                        Login
+                     </Link>
+                  </div>
                   <button
-                     className="w-full mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-3 text-white uppercase rounded text-xs tracking-wider disabled:bg-gray-400 disabled:cursor-not-allowed"
+                     className="ms-4 mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-3 text-white uppercase rounded text-xs tracking-wider disabled:bg-gray-400 disabled:cursor-not-allowed"
                      type="submit"
                      disabled={loading}
                   >
@@ -76,17 +87,8 @@ const RegisterPage: FunctionComponent = () => {
                   </button>
                </div>
             </form>
-            <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-left">
-               have an account?{" "}
-               <a
-                  className="text-red-600 hover:underline hover:underline-offset-4"
-                  href="/user/login"
-               >
-                  Login
-               </a>
-            </div>
          </div>
-      </div>
+      </AuthenticationCard>
    );
 };
 
