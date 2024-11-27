@@ -10,7 +10,7 @@ First, kindly _clone/download_ the `repository` before proceeding further.
 
 **Note**: Please ensure you have `docker` installed on your system.
 
-1. Execute the following command in your terminal:
+1. In the root directory of the cloned project, execute the following command in your terminal:
 ```bash
 ./project-setup
 ```
