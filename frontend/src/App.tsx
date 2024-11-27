@@ -23,14 +23,14 @@ function App() {
             <main className="mb-auto">
                <Routes>
                   <Route path="/" element={<LandingPage/>}/>
-                  <Route path="user/register" element={
+                  <Route path="/user/register" element={
                      !isAuthenticated ? (
                         <RegisterPage/>
                      ) : (
                         <Navigate replace to={"/article/personalised"}/>
                      )
                   }/>
-                  <Route path="user/login" element={
+                  <Route path="/user/login" element={
                      !isAuthenticated ? (
                         <LoginPage/>
                      ) : (

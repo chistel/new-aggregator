@@ -27,6 +27,8 @@ First, kindly _clone/download_ the `repository` before proceeding further.
 php artisan articles:fetch
 ```
 
+5. Mailpit is used in the docker environment for local mail. to access it, Open `http://localhost:8025/` in your browser
+
 
 ## - The api documentation can be found in
 `http://localhost/api/documentation`

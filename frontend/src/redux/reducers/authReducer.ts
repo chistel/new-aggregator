@@ -63,19 +63,27 @@ const { actions, reducer } = createSlice({
             state.loading = true;
             state.error = undefined;
             state.errors = null;
-         }).addCase('@user/Login', (state) => {
-         state.loading = true;
-         state.error = undefined;
-         state.errors = null;
-      }).addCase('@user/Register', (state) => {
-         state.loading = true;
-         state.error = undefined;
-         state.errors = null;
-      }).addCase('@user/PasswordResetRequest', (state) => {
-         state.loading = true;
-         state.error = undefined;
-         state.errors = null;
-      });
+         })
+         .addCase('@user/Login', (state) => {
+            state.loading = true;
+            state.error = undefined;
+            state.errors = null;
+         })
+         .addCase('@user/Register', (state) => {
+            state.loading = true;
+            state.error = undefined;
+            state.errors = null;
+         })
+         .addCase('@user/PasswordResetRequest', (state) => {
+            state.loading = true;
+            state.error = undefined;
+            state.errors = null;
+         })
+         .addCase('@user/ResetPassword', (state) => {
+            state.loading = true;
+            state.error = undefined;
+            state.errors = null;
+         });
    },
 });
 
