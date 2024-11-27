@@ -61,15 +61,15 @@ RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.3
 RUN groupadd --force -g $WWWGROUP cdev
 RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 cdev
 
-COPY scheduler /etc/cron.d/scheduler
+#COPY scheduler /etc/cron.d/scheduler
 
-COPY start-container /usr/local/bin/start-container
+COPY scripts/start-container /usr/local/bin/start-container
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY php.ini /etc/php/8.3/cli/conf.d/99-cdev.ini
 COPY my.conf /etc/my.cnf
-RUN chmod +x /usr/local/bin/start-container
-RUN chmod 0644 /etc/cron.d/scheduler \
-    && crontab /etc/cron.d/scheduler
+#RUN chmod +x /usr/local/bin/start-container
+#RUN chmod 0644 /etc/cron.d/scheduler \
+#    && crontab /etc/cron.d/scheduler
 
 RUN chmod +x /usr/local/bin/start-container
 

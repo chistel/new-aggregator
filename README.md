@@ -22,7 +22,7 @@ First, kindly _clone/download_ the `repository` before proceeding further.
 ./docker/start backend-bash
 ```
 
-4. If you want to pull the more articles, while in the laravel/backend terminal, run the following laravel artisan command
+4. By default, this would always pull news every 15 minutes via schedule, but if you want to pull manually, while in the laravel/backend terminal, run the following laravel artisan command
 ```bash
 php artisan articles:fetch
 ```

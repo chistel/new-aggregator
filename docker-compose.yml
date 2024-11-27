@@ -1,5 +1,6 @@
 services:
   new-aggregator:
+    image: new-aggregator-build
     build:
       context: ./backend/docker
       dockerfile: Dockerfile
@@ -11,6 +12,7 @@ services:
       - '80:80'
       - '${VITE_PORT:-5176}:${VITE_PORT:-5176}'
     environment:
+      APP_ENV: local
       WWWUSER: '${WWWUSER}'
       XDEBUG_MODE: '${XDEBUG_MODE:-off}'
       XDEBUG_CONFIG: '${XDEBUG_CONFIG:-client_host=host.docker.internal}'
@@ -24,6 +26,23 @@ services:
     depends_on:
       - mysql
       - redis
+
+  scheduler:
+    command: /scripts/scheduler.sh
+    image: new-aggregator-build
+    container_name: news-aggregator-scheduler
+    #command: php artisan schedule:work
+    stop_signal: SIGTERM # Set this for graceful shutdown if you're using fpm-apache or fpm-nginx
+    environment:
+      WWWUSER: '${WWWUSER}'
+    volumes:
+      - ./backend/docker/scripts:/scripts
+      - './backend:/var/www/html'
+    env_file:
+      - ./envs/backend.env
+    networks:
+      - chistel
+
   frontend-app:
     build:
       context: ./frontend
@@ -38,6 +57,7 @@ services:
       VITE_APP_BACKEND_ADDRESS: 'http://localhost:80/api'
     volumes:
       - ./frontend:/app
+
   mysql:
     container_name: news-aggregator-mysql
     image: 'mysql/mysql-server:8.0'
@@ -60,6 +80,7 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "-p${MYSQL_DB_PASSWORD}" ]
       retries: 3
       timeout: 5s
+
   redis:
     container_name: news-aggregator-redis
     image: 'redis:alpine'
@@ -76,23 +97,7 @@ services:
         - ping
       retries: 3
       timeout: 5s
-  queue:
-    container_name: news-aggregator-queue
-    build:
-      context: ./backend/docker
-      dockerfile: Dockerfile
-      args:
-        WWWGROUP: '${WWWGROUP}'
-    environment:
-      WWWUSER: '${WWWUSER}'
-      LARAVEL_CDEV: 1
-    volumes:
-      - './backend:/var/www/html'
-    env_file:
-      - ./envs/backend.env
-    networks:
-      - chistel
-    command: php artisan queue:work
+
   mailpit:
     container_name: news-aggregator-mailpit
     image: 'axllent/mailpit:latest'
@@ -110,8 +115,4 @@ volumes:
     driver: local
   cdev-redis:
     driver: local
-#  mysql:
-#    driver: local
-#  redis:
-#    driver: local
 

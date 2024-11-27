@@ -1,8 +1,7 @@
 <?php
 
-use App\Providers\NewsAggregatorServiceProvider;
-
 return [
     App\Providers\AppServiceProvider::class,
-    NewsAggregatorServiceProvider::class,
+    App\Providers\HorizonServiceProvider::class,
+    App\Providers\NewsAggregatorServiceProvider::class,
 ];
