@@ -28,7 +28,11 @@ php artisan articles:fetch
 ```
 
 5. Mailpit is used in the docker environment for local mail. to access it, Open `http://localhost:8025/` in your browser
+####
+6. To run unit test after setup, run the command below
+```bash
+./docker/start artisan test
+```
 
-
-## - The api documentation can be found in
+## — The api documentation can be found in
 `http://localhost/api/documentation`

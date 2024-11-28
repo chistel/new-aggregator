@@ -18,6 +18,23 @@
 #}
 
 
+check_containers_active() {
+    local active_containers
+    active_containers=$(docker ps -q | wc -l)
+    if [ "$active_containers" -eq 0 ]; then
+        return 1
+    fi
+    return 0
+}
+
+RUN_TEST=false
+for arg in "$@"; do
+    if [ "$arg" == "--run-backend-test" ]; then
+        RUN_TEST=true
+        break
+    fi
+done
+
 # Build containers
 ./docker/start build --no-cache
 
@@ -35,8 +52,16 @@ sleep 3
 
 ./docker/start artisan db:seed
 
-cd frontend || { echo "Error: 'frontend' directory not found."; exit 1; }
 
-npm install
+if cd frontend; then
+    npm install
+else
+    echo "Error: 'frontend' directory not found."
+    exit 1
+fi
+
+#sleep 3
+
+#./docker/start artisan test
 
 echo "News aggregator setup complete"
