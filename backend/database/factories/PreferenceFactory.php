@@ -19,7 +19,7 @@ class PreferenceFactory extends Factory
     public function definition(): array
     {
         return [
-            'uuid' => $this->faker->uuid,
+            // 'uuid' => $this->faker->uuid,
             'providers' => $this->faker->randomElements,
             'authors' => $this->faker->randomElements,
             'categories' => $this->faker->randomElements,

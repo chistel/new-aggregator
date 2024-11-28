@@ -25,6 +25,7 @@ class AuthenticationControllerTest extends TestCase
             'password' => 'password123',
         ]);
 
+        logger('content : '.json_encode($response->getContent()));
         $response->assertStatus(201)
             ->assertJsonStructure([
                 'data' => [
