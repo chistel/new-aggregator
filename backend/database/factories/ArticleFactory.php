@@ -20,6 +20,7 @@ class ArticleFactory extends Factory
     public function definition(): array
     {
         return [
+            'uuid' => $this->faker->uuid,
             'title' => $this->faker->sentence(),
             'description' => $this->faker->paragraph(),
             'source' => $this->faker->randomElement(['NewsAPI', 'The Guardian', 'BBC News', 'New York Times']),

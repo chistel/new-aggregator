@@ -11,9 +11,9 @@ use App\Http\Resources\Users\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'user'], function () {
-    Route::post('/register', [AuthenticationController::class, 'register']);
-    Route::post('/login', [AuthenticationController::class, 'login']);
+Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
+    Route::as('register')->post('/register', [AuthenticationController::class, 'register']);
+    Route::as('login')->post('/login', [AuthenticationController::class, 'login']);
     Route::group(['prefix' => 'password-reset'], function () {
         Route::post('/request', [PasswordResetController::class, 'sendResetLinkEmail']);
         Route::post('/change', [PasswordResetController::class, 'resetPassword']);

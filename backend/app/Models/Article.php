@@ -19,6 +19,7 @@ class Article extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'uuid',
         'title',
         'author',
         'description',
@@ -58,7 +59,7 @@ class Article extends Model
     {
         $provider = trim((string) $provider);
 
-        if (!empty($provider)) {
+        if (! empty($provider)) {
             $query->where('provider', $provider);
         }
 

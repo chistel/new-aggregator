@@ -51,4 +51,9 @@ class NYTimesService implements NewsSourceService
 
         return collect();
     }
+
+    public function searchArticles(array $params = []): Collection
+    {
+        return collect();
+    }
 }

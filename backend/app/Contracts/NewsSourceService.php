@@ -14,4 +14,6 @@ interface NewsSourceService
      * Fetch articles from the news source.
      */
     public function fetchArticles(): Collection;
+
+    public function searchArticles(array $params = []): Collection;
 }

@@ -9,12 +9,12 @@ use App\Events\Users\UserRegisteredEvent;
 
 class CreateUserPreferenceRecord
 {
-    public function handle(UserRegisteredEvent|UserLoggedInEvent $event)
+    public function handle(UserRegisteredEvent|UserLoggedInEvent $event): void
     {
         $user = $event->user;
 
         if (! $user->preferences) {
-            $user->preferences()->create();
+            $user->preferences()->create([]);
         }
     }
 }

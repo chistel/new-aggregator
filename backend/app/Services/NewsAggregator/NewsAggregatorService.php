@@ -26,4 +26,6 @@ class NewsAggregatorService
 
         return $allArticles;
     }
+
+    public function searchArticles(array $params = []) {}
 }

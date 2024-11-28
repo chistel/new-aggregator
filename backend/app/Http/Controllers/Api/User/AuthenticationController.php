@@ -57,7 +57,7 @@ class AuthenticationController extends BaseController
      */
     public function register(RegisterRequest $request): UserResource
     {
-        $user = User::create([
+        $user = User::query()->create([
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
@@ -111,7 +111,8 @@ class AuthenticationController extends BaseController
         $credentials = $request->only('email', 'password');
 
         if (auth()->attempt($credentials)) {
-            //$request->session()->regenerate();
+
+            /** @var User $user */
             $user = auth()->user();
             $token = $user->createToken('NewsAggregatorToken')->plainTextToken;
 
